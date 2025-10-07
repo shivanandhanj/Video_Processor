@@ -1,4 +1,4 @@
-package com.example.videoprocessor.util;
+package com.example.Video_Processor.util;
 
 import org.jcodec.api.FrameGrab;
 import org.jcodec.api.JCodecException;

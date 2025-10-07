@@ -1,34 +1,39 @@
-package com.example.videoprocessor.service;
+package com.example.Video_Processor.service;
 
-import com.example.videoprocessor.util.VideoUtils;
+import com.example.Video_Processor.util.VideoUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Service
 public class VideoService {
 
-    private final String uploadDir = "uploads/";
+    
+    @Value("${app.upload.dir}")
+    private String uploadDir;
 
     public String saveVideo(MultipartFile file) throws IOException {
-        File dir = new File(uploadDir);
-        if (!dir.exists()) dir.mkdirs();
+        Path dirPath = Paths.get(uploadDir);
+        if (!Files.exists(dirPath)) {
+            Files.createDirectories(dirPath);
+        }
 
-        String filePath = uploadDir + file.getOriginalFilename();
-        File destination = new File(filePath);
-        file.transferTo(destination);
+        Path filePath = dirPath.resolve(file.getOriginalFilename());
+        file.transferTo(filePath.toFile());
 
-        return filePath;
+        return filePath.toString();
     }
 
     public String extractThumbnail(MultipartFile file) throws IOException {
-        // First save the video
         String videoPath = saveVideo(file);
 
-        // Extract thumbnail
-        String thumbnailPath = uploadDir + "thumbnail_" + System.currentTimeMillis() + ".png";
+        String thumbnailPath = uploadDir + "/thumbnail_" + System.currentTimeMillis() + ".png";
         VideoUtils.extractFrame(videoPath, thumbnailPath);
 
         return thumbnailPath;
